@@ -13,6 +13,12 @@ EXPOSE 8000
 
 ARG DEV=false
 
+# Install PostgreSQL development libraries and build dependencies
+RUN apk add --no-cache \
+    postgresql-dev \
+    gcc \
+    python3-dev \
+    musl-dev
 
 RUN python -m venv /py && \
     /py/bin/pip install --upgrade pip && \
@@ -25,6 +31,10 @@ RUN python -m venv /py && \
         --disabled-password \
         --no-create-home \
         django-user
+
+# Remove build dependencies to reduce image size (keep postgresql-libs for runtime)
+RUN apk del --no-cache gcc python3-dev musl-dev && \
+    apk add --no-cache postgresql-libs
 
 ENV PATH="/py/bin:$PATH"
 
