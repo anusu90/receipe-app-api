@@ -28,6 +28,19 @@ services:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_DB=${POSTGRES_DB}
+    ports:
+      - 5432:5432
+
+  # product:
+  #   build:
+  #     context: .
+  #     dockerfile: ./DockerFile.product.dev
+  #   image: recipe-app-product
+  #   ports:
+  #     - 5173:5173
+  #   volumes:
+  #     - ./product:/product
+  #     - /product/node_modules
 
 volumes:
   dev-db-data:

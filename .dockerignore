@@ -11,3 +11,7 @@ app/*/*/*/__pycache__/
 .env/
 .venv/
 venv/
+
+
+product/node_modules
+product/dist
