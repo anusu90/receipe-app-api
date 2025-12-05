@@ -15,6 +15,7 @@ User = get_user_model()
 CREATE_USER_URL = reverse('user:create')
 TOKEN_URL = reverse('user:token')
 ME_URL = reverse('user:me')
+VERIFY_TOKEN_URL = reverse('user:verify-token')
 
 
 def create_user(**params):
@@ -62,7 +63,8 @@ class PublicUserApiTests(TestCase):
         }
         create_user(**payload)
         res = self.client.post(TOKEN_URL, payload)
-        self.assertIn('token', res.data)
+        self.assertIn('access', res.data)
+        self.assertIn('refresh', res.data)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
 
     def test_create_token_invalid_credentials(self):
@@ -70,8 +72,22 @@ class PublicUserApiTests(TestCase):
         create_user(email='test@example.com', password='goodpass')
         payload = {'email': 'test@example.com', 'password': 'badpass'}
         res = self.client.post(TOKEN_URL, payload)
-        self.assertNotIn('token', res.data)
-        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertNotIn('access', res.data)
+        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_verify_valid_token(self):
+        """ Test that valid token returns {'valid': True}. """
+        payload = {
+            "email": 'test@example.com',
+            "password": 'testpass123',
+        }
+        create_user(**payload)
+        token_res = self.client.post(TOKEN_URL, payload)
+        access_token = token_res.data['access']
+        
+        verify_res = self.client.post(VERIFY_TOKEN_URL, {'token': access_token})
+        self.assertEqual(verify_res.status_code, status.HTTP_200_OK)
+        self.assertEqual(verify_res.data, {'valid': True})
 
     def test_fail_access_to_unauthorized_user(self):
         """ Test error returned if user is not authenticated. """
@@ -115,3 +131,8 @@ class PrivateUserApiTests(TestCase):
         self.assertEqual(self.user.name, payload['name'])
         self.assertTrue(self.user.check_password(payload['password']))
         self.assertEqual(res.status_code, status.HTTP_200_OK)
+
+    def test_invalid_token(self):
+        """ Test that invalid token is not accepted. """
+        res = self.client.post(VERIFY_TOKEN_URL, {'token': 'invalid'})
+        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
