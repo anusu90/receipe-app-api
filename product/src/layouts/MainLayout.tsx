@@ -4,9 +4,11 @@ import TopNav from "./components/TopNav";
 
 export function MainLayout() {
   return (
-    <Box>
+    <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
       <TopNav />
-      <Outlet />
+      <Box sx={{ flexGrow: 1, overflow: "auto" }}>
+        <Outlet />
+      </Box>
     </Box>
   );
 }
