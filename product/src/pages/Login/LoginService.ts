@@ -1,4 +1,4 @@
-import axios from "axios";
+import { client } from "../../apiClient/client";
 
 type LoginArgs = {
   email: string;
@@ -6,9 +6,14 @@ type LoginArgs = {
 };
 
 type LoginData = {
-  token: string | null;
+  access: string | null;
+  refresh: string | null;
 };
 
 export function login(args: LoginArgs) {
-  return axios.post<LoginData>("http://localhost:8000/api/user/token/", args);
+  return client<LoginData, LoginArgs>({
+    url: "/user/token/",
+    method: "POST",
+    payload: args,
+  });
 }

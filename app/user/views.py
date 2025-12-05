@@ -2,11 +2,11 @@
 View for the user API
 """
 
-from rest_framework import generics, authentication, permissions
-from rest_framework.authtoken.views import ObtainAuthToken
-from rest_framework.settings import api_settings
+from rest_framework import generics, permissions
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenVerifyView
 
-from user.serializers import UserSerializer, AuthTokenSerializer
+
+from user.serializers import UserSerializer, VerifyTokenSerializer
 
 
 class CreateUserView(generics.CreateAPIView):
@@ -14,18 +14,18 @@ class CreateUserView(generics.CreateAPIView):
     serializer_class = UserSerializer
 
 
-class CreateTokenView(ObtainAuthToken):
+class CreateTokenView(TokenObtainPairView):
     """ Create a new auth token for user. """
-    serializer_class = AuthTokenSerializer
+    pass
 
-    # This is to use the default renderer classes for the token view
-    renderer_classes = api_settings.DEFAULT_RENDERER_CLASSES
+
+class VerifyTokenView(TokenVerifyView):
+    serializer_class = VerifyTokenSerializer
 
 
 class ManageUserView(generics.RetrieveUpdateAPIView):
     serializer_class = UserSerializer
 
-    authentication_classes = [authentication.TokenAuthentication]
     permission_classes = [permissions.IsAuthenticated]
 
     def get_object(self):
